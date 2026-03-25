@@ -1,0 +1,27 @@
+import axios from "axios";
+
+// Step 2: Axios Setup
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
+  withCredentials: true,
+});
+
+// Interceptor to attach token to requests
+API.interceptors.request.use((req) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    req.headers.Authorization = `Bearer ${token}`;
+  }
+  return req;
+});
+
+// Step 3: API Functions
+export const loginUser = (data) => API.post("/auth/login", data);
+export const signupUser = (data) => API.post("/auth/signup", data);
+
+export const getNotes = () => API.get("/notes");
+export const createNote = (data) => API.post("/notes", data);
+export const updateNote = (id, data) => API.put(`/notes/${id}`, data);
+export const deleteNote = (id) => API.delete(`/notes/${id}`);
+
+export default API;
