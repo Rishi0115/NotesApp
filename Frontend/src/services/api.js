@@ -24,4 +24,11 @@ export const createNote = (data) => API.post("/notes", data);
 export const updateNote = (id, data) => API.put(`/notes/${id}`, data);
 export const deleteNote = (id) => API.delete(`/notes/${id}`);
 
+export const uploadPDF = (formData) => API.post("/ai/upload", formData, {
+  headers: { "Content-Type": "multipart/form-data" }
+});
+export const chatWithAI = (data) => API.post("/ai/chat", data);
+export const getDocuments = () => API.get("/ai");
+export const deleteDocument = (id) => API.delete(`/ai/${id}`);
+
 export default API;

@@ -2,17 +2,22 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const path = require('path');
 const AppError = require('./utils/AppError');
 const errorHandler = require('./middleware/errorHandler');
 
 // Route files
 const authRoutes = require('./routes/authRoutes');
 const noteRoutes = require('./routes/noteRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 
 // ─── Security Headers ─────────────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: false,
+}));
 
 // ─── CORS ─────────────────────────────────────────────────────
 app.use(cors({
@@ -40,6 +45,8 @@ app.get('/', (req, res) => {
 // ─── Mount Routes ─────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ─── 404 Handler ──────────────────────────────────────────────
 app.all('*', (req, res, next) => {

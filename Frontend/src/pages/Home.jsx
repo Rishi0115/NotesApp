@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNotes } from '../hooks/useNotes';
+import { useAI } from '../hooks/useAI';
 import NoteCard from '../components/NoteCard';
 import NoteForm from '../components/NoteForm';
+import DocumentCard from '../components/DocumentCard';
+import AIAssistant from '../components/AIAssistant';
 import { Plus, StickyNote, Search } from 'lucide-react';
 
 const Home = () => {
   const { notes, loading, fetchNotes, addNote, editNote, removeNote } = useNotes();
+  const { documents, docsLoading, fetchDocuments, removeDocument } = useAI();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +17,13 @@ const Home = () => {
   useEffect(() => {
     fetchNotes();
   }, [fetchNotes]);
+
+  useEffect(() => {
+    fetchDocuments();
+    const handleUpload = () => fetchDocuments();
+    window.addEventListener('documentUploaded', handleUpload);
+    return () => window.removeEventListener('documentUploaded', handleUpload);
+  }, [fetchDocuments]);
 
   const handleOpenForm = (note = null) => {
     setEditingNote(note);
@@ -117,6 +128,37 @@ const Home = () => {
           onClose={handleCloseForm}
         />
       )}
+
+      <div className="mt-12 flex flex-col justify-between items-start mb-6 gap-2 border-t border-gray-100 pt-10">
+        <h2 className="text-2xl font-bold text-gray-900">My PDFs</h2>
+        <p className="text-gray-500">Files available for AI chat context</p>
+      </div>
+
+      {docsLoading && documents.length === 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-32 bg-gray-100 rounded-xl animate-pulse"></div>
+          ))}
+        </div>
+      ) : documents.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-2xl border border-gray-100 border-dashed">
+          <p className="text-gray-500 max-w-sm mx-auto">
+            You haven't uploaded any PDFs yet. Open the AI Assistant to add documents!
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {documents.map((doc) => (
+            <DocumentCard
+              key={doc._id}
+              document={doc}
+              onDelete={removeDocument}
+            />
+          ))}
+        </div>
+      )}
+      
+      <AIAssistant />
     </div>
   );
 };

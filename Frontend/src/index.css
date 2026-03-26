@@ -1,6 +1,9 @@
 @import "tailwindcss";
+@import "@tailwindcss/typography";
+@import "@fontsource/mona-sans";
 
 @theme {
+  --font-sans: "Mona Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --color-primary-50: #f5f3ff;
   --color-primary-100: #ede9fe;
   --color-primary-500: #8b5cf6;
