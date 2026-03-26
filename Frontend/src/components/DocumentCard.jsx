@@ -6,7 +6,10 @@ const DocumentCard = ({ document, onDelete }) => {
     ? import.meta.env.VITE_API_BASE_URL.replace('/api', '')
     : 'http://localhost:5000';
 
-  const fileUrl = document.fileUrl ? `${baseUrl}${document.fileUrl}` : null;
+  const token = localStorage.getItem('token');
+  const fileUrl = document.fileUrl 
+    ? `${baseUrl}${document.fileUrl}${token ? '?token=' + token : ''}` 
+    : null;
   const canView = !!fileUrl;
 
   const handleCardClick = () => {

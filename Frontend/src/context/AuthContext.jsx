@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import { loginUser, signupUser } from "../services/api";
+import { loginUser, signupUser, getMe } from "../services/api";
 
 export const AuthContext = createContext();
 
@@ -7,27 +7,36 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Basic check for token on load
+  const loadUser = async () => {
     const token = localStorage.getItem("token");
     if (token) {
-      // In a real app we would verify token with /api/auth/me
-      // For now we just assume logged in if token exists
-      setUser({ token });
+      try {
+        const { data } = await getMe();
+        setUser({ ...data.data, token });
+      } catch (err) {
+        localStorage.removeItem("token");
+        setUser(null);
+      }
+    } else {
+      setUser(null);
     }
     setLoading(false);
+  };
+
+  useEffect(() => {
+    loadUser();
   }, []);
 
   const login = async (email, password) => {
     const { data } = await loginUser({ email, password });
     localStorage.setItem("token", data.token);
-    setUser({ token: data.token });
+    await loadUser(); // Fetch complete user profile
   };
 
   const signup = async (name, email, password) => {
     const { data } = await signupUser({ name, email, password });
     localStorage.setItem("token", data.token);
-    setUser({ token: data.token });
+    await loadUser(); // Fetch complete user profile
   };
 
   const logout = () => {
@@ -36,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, loadUser }}>
       {children}
     </AuthContext.Provider>
   );

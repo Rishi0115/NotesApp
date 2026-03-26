@@ -6,6 +6,7 @@ const { getRelevantChunks } = require('../services/retrievalService');
 const { askAI } = require('../services/aiService');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
+const { invalidateUserCache } = require('../middleware/responseCache');
 const fs = require('fs');
 const path = require('path');
 
@@ -27,6 +28,7 @@ exports.uploadPDF = asyncHandler(async (req, res, next) => {
         fileUrl: `/uploads/${req.file.filename}`,
         chunks,
     });
+    invalidateUserCache(req.user.id);
 
     res.status(201).json({
         success: true,
@@ -76,6 +78,7 @@ exports.deleteDocument = asyncHandler(async (req, res, next) => {
     }
 
     await Document.deleteOne({ _id: doc._id });
+    invalidateUserCache(req.user.id);
 
     res.status(200).json({
         success: true,

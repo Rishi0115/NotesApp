@@ -4,12 +4,13 @@ const AppError = require('../utils/AppError');
 const fs = require('fs');
 const path = require('path');
 
+// ─── Disk storage for PDFs ────────────────────────────────────
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
+const diskStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, uploadsDir);
     },
@@ -19,7 +20,11 @@ const storage = multer.diskStorage({
     }
 });
 
-const fileFilter = (req, file, cb) => {
+// ─── Memory storage for images (sent to Cloudinary) ───────────
+const memoryStorage = multer.memoryStorage();
+
+// ─── File Filters ─────────────────────────────────────────────
+const pdfFilter = (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {
         cb(null, true);
     } else {
@@ -27,10 +32,26 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
+const imageFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+    } else {
+        cb(new AppError('Only image files are allowed', 400), false);
+    }
+};
+
+// PDF upload → disk (needed for text extraction)
 const upload = multer({
-    storage,
-    fileFilter,
-    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB limit
+    storage: diskStorage,
+    fileFilter: pdfFilter,
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
 });
 
-module.exports = { upload };
+// Image upload → memory buffer (sent to Cloudinary, not saved to disk)
+const uploadImage = multer({
+    storage: memoryStorage,
+    fileFilter: imageFilter,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+});
+
+module.exports = { upload, uploadImage };

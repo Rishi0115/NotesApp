@@ -1,6 +1,7 @@
 const Note = require('../models/Note');
 const asyncHandler = require('../utils/asyncHandler');
 const AppError = require('../utils/AppError');
+const { invalidateUserCache } = require('../middleware/responseCache');
 
 // ─── Create Note ──────────────────────────────────────────────
 // POST /api/notes
@@ -9,6 +10,7 @@ exports.createNote = asyncHandler(async (req, res, next) => {
     req.body.user = req.user.id;
 
     const note = await Note.create(req.body);
+    invalidateUserCache(req.user.id);
 
     res.status(201).json({
         success: true,
@@ -66,6 +68,7 @@ exports.updateNote = asyncHandler(async (req, res, next) => {
         new: true,
         runValidators: true,
     });
+    invalidateUserCache(req.user.id);
 
     res.status(200).json({
         success: true,
@@ -88,6 +91,7 @@ exports.deleteNote = asyncHandler(async (req, res, next) => {
     }
 
     await Note.findByIdAndDelete(req.params.id);
+    invalidateUserCache(req.user.id);
 
     res.status(200).json({
         success: true,

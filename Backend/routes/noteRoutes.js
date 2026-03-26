@@ -10,18 +10,19 @@ const {
 } = require('../controllers/noteController');
 const { protect } = require('../middleware/auth');
 const { validateNote, validateNoteUpdate } = require('../middleware/validate');
+const { responseCache } = require('../middleware/responseCache');
 
 // All routes below are protected
 router.use(protect);
 
 router
     .route('/')
-    .get(getNotes)
+    .get(responseCache(15), getNotes)
     .post(validateNote, createNote);
 
 router
     .route('/:id')
-    .get(getNote)
+    .get(responseCache(15), getNote)
     .put(validateNoteUpdate, updateNote)
     .delete(deleteNote);
 

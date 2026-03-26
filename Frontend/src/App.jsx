@@ -6,6 +6,8 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Profile from './pages/Profile';
+import VerifyOTP from './pages/VerifyOTP';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
@@ -18,13 +20,23 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
         <Navbar />
-        <main className="flex-grow container mx-auto px-4 py-8">
+        <main className="flex-grow container mx-auto px-4 pb-8">
           <Routes>
             <Route path="/" element={
               <ProtectedRoute>
                 <Home />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="/verify-otp" element={
+              <ProtectedRoute>
+                <VerifyOTP />
               </ProtectedRoute>
             } />
             <Route path="/login" element={<Login />} />

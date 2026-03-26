@@ -18,6 +18,15 @@ API.interceptors.request.use((req) => {
 // Step 3: API Functions
 export const loginUser = (data) => API.post("/auth/login", data);
 export const signupUser = (data) => API.post("/auth/signup", data);
+export const getMe = () => API.get("/auth/me");
+export const verifyOTPAuth = (data) => API.post("/auth/verify-otp", data);
+
+export const getProfile = () => API.get("/user/profile");
+export const updateProfile = (data) => API.put("/user/profile", data, {
+  headers: { "Content-Type": "multipart/form-data" }
+});
+export const sendOTP = () => API.post("/user/send-otp");
+export const verifyOTPProfile = (data) => API.post("/user/verify-otp", data);
 
 export const getNotes = () => API.get("/notes");
 export const createNote = (data) => API.post("/notes", data);

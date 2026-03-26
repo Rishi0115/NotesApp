@@ -27,6 +27,24 @@ const userSchema = new mongoose.Schema(
             minlength: [6, 'Password must be at least 6 characters'],
             select: false, // Do not return password by default
         },
+        isVerified: {
+            type: Boolean,
+            default: false,
+        },
+        otp: {
+            type: String,
+        },
+        otpExpiry: {
+            type: Date,
+        },
+        profilePic: {
+            type: String,
+            default: '',
+        },
+        bio: {
+            type: String,
+            default: '',
+        },
     },
     { timestamps: true }
 );

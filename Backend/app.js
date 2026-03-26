@@ -5,9 +5,12 @@ const morgan = require('morgan');
 const path = require('path');
 const AppError = require('./utils/AppError');
 const errorHandler = require('./middleware/errorHandler');
+const { apiLimiter } = require('./middleware/rateLimiter');
+const { protect } = require('./middleware/auth');
 
 // Route files
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 const noteRoutes = require('./routes/noteRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
@@ -21,9 +24,12 @@ app.use(helmet({
 
 // ─── CORS ─────────────────────────────────────────────────────
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true
 }));
+
+// ─── Global Rate Limiter ──────────────────────────────────────
+app.use('/api', apiLimiter);
 
 // ─── Logging ──────────────────────────────────────────────────
 if (process.env.NODE_ENV === 'development') {
@@ -44,9 +50,25 @@ app.get('/', (req, res) => {
 
 // ─── Mount Routes ─────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/ai', aiRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ─── Static Uploads (with optional token auth for browsers) ───
+// Browsers can't send Authorization headers for <img src>, so we
+// accept the JWT via a ?token= query param as a fallback.
+// This keeps uploaded files (avatars, PDFs) accessible only to
+// logged-in users.
+app.use('/uploads', (req, res, next) => {
+    // Try Authorization header first, then fall back to query param
+    if (!req.headers.authorization && req.query.token) {
+        req.headers.authorization = `Bearer ${req.query.token}`;
+    }
+    next();
+}, protect, (req, res, next) => {
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+    next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // ─── 404 Handler ──────────────────────────────────────────────
 app.all('*', (req, res, next) => {
