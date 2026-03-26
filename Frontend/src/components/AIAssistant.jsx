@@ -221,15 +221,7 @@ const AIAssistant = () => {
                       {msg.role === 'user' ? (
                         <div className="leading-relaxed whitespace-pre-wrap">{msg.content}</div>
                       ) : (
-                        <div className="leading-relaxed prose prose-sm prose-gray max-w-none
-                          prose-p:my-1.5
-                          prose-ul:my-1.5 prose-ul:pl-4
-                          prose-ol:my-1.5 prose-ol:pl-4
-                          prose-li:my-0.5
-                          prose-headings:my-2 prose-headings:text-gray-900
-                          prose-strong:text-gray-900
-                          prose-a:text-primary-600
-                        ">
+                        <div className="leading-relaxed prose max-w-none">
                           <ReactMarkdown>{msg.content}</ReactMarkdown>
                         </div>
                       )}
